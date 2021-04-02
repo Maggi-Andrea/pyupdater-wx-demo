@@ -14,20 +14,22 @@ from pyupdater.client import Client
 
 import wxupdatedemo
 from wxupdatedemo.main import PyUpdaterWxDemoApp
-from wxupdatedemo.fileserver import RunFileServer
-from wxupdatedemo.fileserver import WaitForFileServerToStart
-from wxupdatedemo.fileserver import ShutDownFileServer
-from wxupdatedemo.utils import GetEphemeralPort
+from wxupdatedemo.fileserver import run_file_server
+from wxupdatedemo.fileserver import wait_for_file_server_to_start
+from wxupdatedemo.fileserver import shut_down_file_server
+from wxupdatedemo.utils import get_ephemeral_port
 
 from wxupdatedemo.config import CLIENT_CONFIG
-from wxupdatedemo.config import UpdatePyUpdaterClientConfig
+from wxupdatedemo.config import update_py_updater_client_config
 
 logger = logging.getLogger(__name__)
 STDERR_HANDLER = logging.StreamHandler(sys.stderr)
 STDERR_HANDLER.setFormatter(logging.Formatter(logging.BASIC_FORMAT))
 
+
 class UpdateStatus(object):
     """Enumerated data type"""
+
     # pylint: disable=invalid-name
     # pylint: disable=too-few-public-methods
     UNKNOWN = 0
@@ -35,35 +37,38 @@ class UpdateStatus(object):
     UPDATE_DOWNLOAD_FAILED = 2
     EXTRACTING_UPDATE_AND_RESTARTING = 3
     UPDATE_AVAILABLE_BUT_APP_NOT_FROZEN = 4
-    COULDNT_CHECK_FOR_UPDATES = 5
+    COULD_NOT_CHECK_FOR_UPDATES = 5
 
-UPDATE_STATUS_STR = \
-    ['Unknown', 'No available updates were found.',
-     'Update download failed.', 'Extracting update and restarting.',
-     'Update available but application is not frozen.',
-     'Couldn\'t check for updates.']
 
-def ParseArgs(argv):
+UPDATE_STATUS_STR = [
+    "Unknown",
+    "No available updates were found.",
+    "Update download failed.",
+    "Extracting update and restarting.",
+    "Update available but application is not frozen.",
+    "Couldn't check for updates.",
+]
+
+
+def parse_args(argv):
     """
     Parse command-line args.
     """
-    usage = ("%(prog)s [options]\n"
-             "\n"
-             "You can also run: python setup.py nosetests")
+    usage = "%(prog)s [options]\n" "\n" "You can also run: python setup.py nosetests"
     parser = argparse.ArgumentParser(usage=usage)
-    parser.add_argument("--debug", help="increase logging verbosity",
-                        action="store_true")
-    parser.add_argument("--version", action='store_true',
-                        help="displays version")
+    parser.add_argument(
+        "--debug", help="increase logging verbosity", action="store_true"
+    )
+    parser.add_argument("--version", action="store_true", help="displays version")
     return parser.parse_args(argv[1:])
 
 
-def InitializeLogging(debug=False):
+def initialize_logging(debug=False):
     """
     Initialize logging.
     """
     logger.addHandler(STDERR_HANDLER)
-    if debug or 'WXUPDATEDEMO_TESTING' in os.environ:
+    if debug or "WXUPDATEDEMO_TESTING" in os.environ:
         level = logging.DEBUG
     else:
         level = logging.INFO
@@ -74,29 +79,29 @@ def InitializeLogging(debug=False):
     logging.getLogger("pyupdater").addHandler(STDERR_HANDLER)
 
 
-def StartFileServer(fileServerDir):
+def start_file_server(file_server_dir):
     """
     Start file server.
     """
-    if not fileServerDir:
-        message = \
-            "The PYUPDATER_FILESERVER_DIR environment variable is not set."
+    if not file_server_dir:
+        message = "The PYUPDATER_FILESERVER_DIR environment variable is not set."
         if hasattr(sys, "frozen"):
             logger.error(message)
             return None
         else:
-            fileServerDir = os.path.join(os.getcwd(), 'pyu-data', 'deploy')
-            message += "\n\tSetting fileServerDir to: %s\n" % fileServerDir
+            file_server_dir = os.path.join(os.getcwd(), "pyu-data", "deploy")
+            message += "\n\tSetting fileServerDir to: %s\n" % file_server_dir
             logger.warning(message)
-    fileServerPort = GetEphemeralPort()
-    thread = threading.Thread(target=RunFileServer,
-                              args=(fileServerDir, fileServerPort))
+    file_server_port = get_ephemeral_port()
+    thread = threading.Thread(
+        target=run_file_server, args=(file_server_dir, file_server_port)
+    )
     thread.start()
-    WaitForFileServerToStart(fileServerPort)
-    return fileServerPort
+    wait_for_file_server_to_start(file_server_port)
+    return file_server_port
 
 
-def CheckForUpdates(fileServerPort, debug):
+def check_for_updates(file_server_port, debug):
     """
     Check for updates.
 
@@ -105,24 +110,25 @@ def CheckForUpdates(fileServerPort, debug):
     """
     assert CLIENT_CONFIG.PUBLIC_KEY is not None
     client = Client(CLIENT_CONFIG, refresh=True)
-    appUpdate = client.update_check(CLIENT_CONFIG.APP_NAME,
-                                    wxupdatedemo.__version__,
-                                    channel='stable')
-    if appUpdate:
+    app_update = client.update_check(
+        CLIENT_CONFIG.APP_NAME, wxupdatedemo.__version__, channel="stable"
+    )
+    if app_update:
         if hasattr(sys, "frozen"):
-            downloaded = appUpdate.download()
+            downloaded = app_update.download()
             if downloaded:
                 status = UpdateStatus.EXTRACTING_UPDATE_AND_RESTARTING
-                if 'WXUPDATEDEMO_TESTING_FROZEN' in os.environ:
-                    sys.stderr.write("Exiting with status: %s\n"
-                                     % UPDATE_STATUS_STR[status])
-                    ShutDownFileServer(fileServerPort)
+                if "WXUPDATEDEMO_TESTING_FROZEN" in os.environ:
+                    sys.stderr.write(
+                        "Exiting with status: %s\n" % UPDATE_STATUS_STR[status]
+                    )
+                    shut_down_file_server(file_server_port)
                     sys.exit(0)
-                ShutDownFileServer(fileServerPort)
+                shut_down_file_server(file_server_port)
                 if debug:
-                    logger.debug('Extracting update and restarting...')
+                    logger.debug("Extracting update and restarting...")
                     time.sleep(10)
-                appUpdate.extract_restart()
+                app_update.extract_restart()
             else:
                 status = UpdateStatus.UPDATE_DOWNLOAD_FAILED
         else:
@@ -132,7 +138,7 @@ def CheckForUpdates(fileServerPort, debug):
     return status
 
 
-def DisplayVersionAndExit():
+def display_version_and_exit():
     """
     Display version and exit.
 
@@ -144,32 +150,33 @@ def DisplayVersionAndExit():
     sys.exit(0)
 
 
-def Run(argv, clientConfig=None):
+def run(argv, client_config=None):
     """
     The main entry point.
     """
-    args = ParseArgs(argv)
+    args = parse_args(argv)
     if args.version:
-        DisplayVersionAndExit()
-    InitializeLogging(args.debug)
-    fileServerDir = os.environ.get('PYUPDATER_FILESERVER_DIR')
-    fileServerPort = StartFileServer(fileServerDir)
-    if fileServerPort:
-        UpdatePyUpdaterClientConfig(clientConfig, fileServerPort)
-        status = CheckForUpdates(fileServerPort, args.debug)
+        display_version_and_exit()
+    initialize_logging(args.debug)
+    file_server_dir = os.environ.get("PYUPDATER_FILESERVER_DIR")
+    file_server_port = start_file_server(file_server_dir)
+    if file_server_port:
+        update_py_updater_client_config(client_config, file_server_port)
+        status = check_for_updates(file_server_port, args.debug)
     else:
-        status = UpdateStatus.COULDNT_CHECK_FOR_UPDATES
-    if 'WXUPDATEDEMO_TESTING_FROZEN' in os.environ:
-        sys.stderr.write("Exiting with status: %s\n"
-                         % UPDATE_STATUS_STR[status])
-        ShutDownFileServer(fileServerPort)
+        status = UpdateStatus.COULD_NOT_CHECK_FOR_UPDATES
+    if "WXUPDATEDEMO_TESTING_FROZEN" in os.environ:
+        sys.stderr.write("Exiting with status: %s\n" % UPDATE_STATUS_STR[status])
+        shut_down_file_server(file_server_port)
         sys.exit(0)
-    mainLoop = (argv[0] != 'RunTester')
-    if not 'WXUPDATEDEMO_TESTING_FROZEN' in os.environ:
+    main_loop = argv[0] != "RunTester"
+    if not "WXUPDATEDEMO_TESTING_FROZEN" in os.environ:
         return PyUpdaterWxDemoApp.Run(
-            fileServerPort, UPDATE_STATUS_STR[status], mainLoop)
+            file_server_port, UPDATE_STATUS_STR[status], main_loop
+        )
     else:
         return None
 
+
 if __name__ == "__main__":
-    Run(sys.argv)
+    run(sys.argv)

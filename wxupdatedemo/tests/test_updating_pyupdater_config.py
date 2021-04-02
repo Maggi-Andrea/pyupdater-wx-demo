@@ -24,8 +24,8 @@ class PyUpdaterConfigUpdateTester(unittest.TestCase):
         """
         port = 12345
         from wxupdatedemo.config import CLIENT_CONFIG
-        from wxupdatedemo.config import UpdatePyUpdaterClientConfig
-        UpdatePyUpdaterClientConfig(clientConfig=None, port=port)
+        from wxupdatedemo.config import update_py_updater_client_config
+        update_py_updater_client_config(client_config=None, port=port)
         self.assertEqual(CLIENT_CONFIG.UPDATE_URLS,
                          ['http://127.0.0.1:%s' % port])
 

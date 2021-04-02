@@ -21,21 +21,20 @@ import appdirs
 import bsdiff4
 import ed25519
 import psutil
-import six
 
 import wxupdatedemo
 
 from dsdev_utils.system import get_system
 from dsdev_utils.crypto import get_package_hashes
 from pyupdater import settings
-from pyupdater.builder import Builder
+from pyupdater.utils.builder import Builder
 
 logger = logging.getLogger(__name__)
 
-APP_NAME = 'PyUpdaterBuildTester'
-COMPANY_NAME = 'Test Company'
-CURRENT_VERSION = '1.2.3'
-UPDATE_VERSION = '1.2.5'
+APP_NAME = "PyUpdaterBuildTester"
+COMPANY_NAME = "Test Company"
+CURRENT_VERSION = "1.2.3"
+UPDATE_VERSION = "1.2.5"
 # Pretend all file sizes are 10000 bytes for now:
 FILE_SIZE = 10000
 # Pretend all patch sizes are 250 bytes for now:
@@ -43,81 +42,81 @@ PATCH_SIZE = 250
 # PyUpdater version format is:
 # Major.Minor.Patch.[Alpha|Beta|Stable].ReleaseNumber
 # where Alpha=0, Beta=1 and Stable=2
-CURRENT_VERSION_PYU_FORMAT = '%s.2.0' % CURRENT_VERSION
-UPDATE_VERSION_PYU_FORMAT = '%s.2.0' % UPDATE_VERSION
+CURRENT_VERSION_PYU_FORMAT = "%s.2.0" % CURRENT_VERSION
+UPDATE_VERSION_PYU_FORMAT = "%s.2.0" % UPDATE_VERSION
 
 # pylint: disable=bad-continuation
 VERSIONS = {
-  'updates': {
-    APP_NAME : {
-      CURRENT_VERSION_PYU_FORMAT: {
-        'mac': {
-          'file_hash': None,
-          'filename': '%s-mac-%s.tar.gz' % (APP_NAME, CURRENT_VERSION),
-          'file_size': FILE_SIZE
-        },
-        'win': {
-          'file_hash': None,
-          'filename': '%s-win-%s.zip' % (APP_NAME, CURRENT_VERSION),
-          'file_size': FILE_SIZE
-        },
-        'nix32': {
-          'file_hash': None,
-          'filename': '%s-nix32-%s.tar.gz' % (APP_NAME, CURRENT_VERSION),
-          'file_size': FILE_SIZE
-        },
-        'nix64': {
-          'file_hash': None,
-          'filename': '%s-nix64-%s.tar.gz' % (APP_NAME, CURRENT_VERSION),
-          'file_size': FILE_SIZE
+    "latest": {
+        APP_NAME: {
+            "stable": {
+                "mac": UPDATE_VERSION_PYU_FORMAT,
+                "win": UPDATE_VERSION_PYU_FORMAT,
+                "nix32": UPDATE_VERSION_PYU_FORMAT,
+                "nix64": UPDATE_VERSION_PYU_FORMAT,
+            }
         }
-      },
-      UPDATE_VERSION_PYU_FORMAT: {
-        'mac': {
-          'file_hash': None,
-          'filename': '%s-mac-%s.tar.gz' % (APP_NAME, UPDATE_VERSION),
-          'file_size': FILE_SIZE,
-          'patch_name': '%s-mac-2' % APP_NAME,
-          'patch_hash': None,
-          'patch_size': PATCH_SIZE
-        },
-        'win': {
-          'file_hash': None,
-          'filename': '%s-win-%s.zip' % (APP_NAME, UPDATE_VERSION),
-          'file_size': FILE_SIZE,
-          'patch_name': '%s-win-2' % APP_NAME,
-          'patch_hash': None,
-          'patch_size': PATCH_SIZE
-        },
-        'nix32': {
-          'file_hash': None,
-          'filename': '%s-nix32-%s.tar.gz' % (APP_NAME, UPDATE_VERSION),
-          'file_size': FILE_SIZE,
-          'patch_name': '%s-nix32-2' % APP_NAME,
-          'patch_hash': None,
-          'patch_size': PATCH_SIZE
-        },
-        'nix64': {
-          'file_hash': None,
-          'filename': '%s-nix64-%s.tar.gz' % (APP_NAME, UPDATE_VERSION),
-          'file_size': FILE_SIZE,
-          'patch_name': '%s-nix64-2' % APP_NAME,
-          'patch_hash': None,
-          'patch_size': PATCH_SIZE
+    },
+    "updates": {
+        APP_NAME: {
+            CURRENT_VERSION_PYU_FORMAT: {
+                "mac": {
+                    "file_hash": None,
+                    "filename": "%s-mac-%s.tar.gz" % (APP_NAME, CURRENT_VERSION),
+                    "file_size": FILE_SIZE,
+                },
+                "win": {
+                    "file_hash": None,
+                    "filename": "%s-win-%s.zip" % (APP_NAME, CURRENT_VERSION),
+                    "file_size": FILE_SIZE,
+                },
+                "nix32": {
+                    "file_hash": None,
+                    "filename": "%s-nix32-%s.tar.gz" % (APP_NAME, CURRENT_VERSION),
+                    "file_size": FILE_SIZE,
+                },
+                "nix64": {
+                    "file_hash": None,
+                    "filename": "%s-nix64-%s.tar.gz" % (APP_NAME, CURRENT_VERSION),
+                    "file_size": FILE_SIZE,
+                },
+            },
+            UPDATE_VERSION_PYU_FORMAT: {
+                "mac": {
+                    "file_hash": None,
+                    "filename": "%s-mac-%s.tar.gz" % (APP_NAME, UPDATE_VERSION),
+                    "file_size": FILE_SIZE,
+                    "patch_name": "%s-mac-2" % APP_NAME,
+                    "patch_hash": None,
+                    "patch_size": PATCH_SIZE,
+                },
+                "win": {
+                    "file_hash": None,
+                    "filename": "%s-win-%s.zip" % (APP_NAME, UPDATE_VERSION),
+                    "file_size": FILE_SIZE,
+                    "patch_name": "%s-win-2" % APP_NAME,
+                    "patch_hash": None,
+                    "patch_size": PATCH_SIZE,
+                },
+                "nix32": {
+                    "file_hash": None,
+                    "filename": "%s-nix32-%s.tar.gz" % (APP_NAME, UPDATE_VERSION),
+                    "file_size": FILE_SIZE,
+                    "patch_name": "%s-nix32-2" % APP_NAME,
+                    "patch_hash": None,
+                    "patch_size": PATCH_SIZE,
+                },
+                "nix64": {
+                    "file_hash": None,
+                    "filename": "%s-nix64-%s.tar.gz" % (APP_NAME, UPDATE_VERSION),
+                    "file_size": FILE_SIZE,
+                    "patch_name": "%s-nix64-2" % APP_NAME,
+                    "patch_hash": None,
+                    "patch_size": PATCH_SIZE,
+                },
+            },
         }
-      }
-    }
-  },
-  'latest': {
-    APP_NAME: {
-      'stable': {
-        'mac': UPDATE_VERSION_PYU_FORMAT,
-        'win': UPDATE_VERSION_PYU_FORMAT,
-        'nix32': UPDATE_VERSION_PYU_FORMAT,
-        'nix64': UPDATE_VERSION_PYU_FORMAT
-      }
-    }
-  }
+    },
 }
 
 # Generated by "pyupdater keys -c":
@@ -127,13 +126,15 @@ PUBLIC_KEY = "12y2oHGB2oroRQJkR73CJNaFeQy776oXsUrqWaAEiZU"
 PRIVATE_KEY = "nHgoNwSmXSDNSMqQTtdAEmi/6otajiNYJEXESvAO8dc"
 
 KEYS = {
-  "app_public": "MIBCEwFh7AcaxJrHKIgYqAmZ9YX16NXVHLi+EdDmtYc",
-  "signature": ("1YTDuJauq7qVFUrKPHGMMESllJ4umo6u5r9pEgVmvlxgXi3qGXnKWo2LG94"
-                "+oosN3KiO8DlxOmyfuwaaQKtFCw")
+    "app_public": "MIBCEwFh7AcaxJrHKIgYqAmZ9YX16NXVHLi+EdDmtYc",
+    "signature": (
+        "1YTDuJauq7qVFUrKPHGMMESllJ4umo6u5r9pEgVmvlxgXi3qGXnKWo2LG94"
+        "+oosN3KiO8DlxOmyfuwaaQKtFCw"
+    ),
 }
 
 
-def PidIsRunning(pid):
+def pid_is_running(pid):
     """
     Check if a process with PID pid is running.
     """
@@ -152,100 +153,134 @@ class FreezeUpdateAvailableTester(unittest.TestCase):
     """
     Test ability to freeze and run app with an update available.
     """
+
     def __init__(self, *args, **kwargs):
         super(FreezeUpdateAvailableTester, self).__init__(*args, **kwargs)
-        self.initialWorkingDir = None
-        self.fileServerDir = None
+        self.run_py_file_path = None
+        self.server_dir_path = None
         # self.tempDir contains .pyupdater/config.pyu, pyu-data/new/ :
-        self.tempDir = None
-        self.updateFilename = None
-        self.originalVersion = wxupdatedemo.__version__
+        self.pyupdater_dir_path = None
+        self.update_filename = None
+        self.original_version = wxupdatedemo.__version__
 
     def setUp(self):
-        # pylint: disable=too-many-statements
-        # pylint: disable=too-many-locals
-        self.initialWorkingDir = os.getcwd()
+        self.run_py_file_path = os.path.dirname(
+            os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        )
 
-        userDataDir = appdirs.user_data_dir(APP_NAME, COMPANY_NAME)
-        if os.path.exists(userDataDir):
-            shutil.rmtree(userDataDir)
-        os.makedirs(userDataDir)
-        versionsUserDataFilePath = os.path.join(userDataDir, 'versions.gz')
-        userDataUpdateDir = os.path.join(userDataDir, "update")
-        os.mkdir(userDataUpdateDir)
         system = get_system()
-        self.currentFilename = \
-            VERSIONS['updates'][APP_NAME][CURRENT_VERSION_PYU_FORMAT]\
-            [system]['filename']
-        currentFilePath = os.path.join(userDataUpdateDir, self.currentFilename)
-        with open(currentFilePath, "wb") as currentFile:
-            currentFile.write("%s" % CURRENT_VERSION)
-            currentFile.seek(FILE_SIZE - 1)
-            currentFile.write("\0")
-        fileHash = get_package_hashes(currentFilePath)
-        VERSIONS['updates'][APP_NAME][CURRENT_VERSION_PYU_FORMAT]\
-            [system]['file_hash'] = fileHash
+        current_filename = VERSIONS["updates"][APP_NAME][CURRENT_VERSION_PYU_FORMAT][
+            system
+        ]["filename"]
 
-        tempFile = tempfile.NamedTemporaryFile()
-        self.fileServerDir = tempFile.name
-        tempFile.close()
-        os.mkdir(self.fileServerDir)
-        os.chdir(self.fileServerDir)
+        self.update_filename = VERSIONS["updates"][APP_NAME][UPDATE_VERSION_PYU_FORMAT][
+            system
+        ]["filename"]
+        patch_filename = VERSIONS["updates"][APP_NAME][UPDATE_VERSION_PYU_FORMAT][
+            system
+        ]["patch_name"]
 
-        self.updateFilename = \
-            VERSIONS['updates'][APP_NAME][UPDATE_VERSION_PYU_FORMAT]\
-            [system]['filename']
-        with open(self.updateFilename, "wb") as updateFile:
-            updateFile.write("%s" % UPDATE_VERSION)
-            updateFile.seek(FILE_SIZE - 1)
-            updateFile.write("\0")
-        os.chdir(self.fileServerDir)
-        fileHash = get_package_hashes(self.updateFilename)
-        VERSIONS['updates'][APP_NAME][UPDATE_VERSION_PYU_FORMAT]\
-            [system]['file_hash'] = fileHash
-        self.patchFilename = \
-            VERSIONS['updates'][APP_NAME][UPDATE_VERSION_PYU_FORMAT]\
-            [system]['patch_name']
-        bsdiff4.file_diff(currentFilePath, self.updateFilename,
-                          self.patchFilename)
-        os.chdir(self.fileServerDir)
-        fileHash = get_package_hashes(self.patchFilename)
-        VERSIONS['updates'][APP_NAME][UPDATE_VERSION_PYU_FORMAT]\
-            [system]['patch_hash'] = fileHash
-        os.chdir(self.initialWorkingDir)
-        privateKey = ed25519.SigningKey(PRIVATE_KEY.encode('utf-8'),
-                                        encoding='base64')
-        signature = privateKey.sign(six.b(json.dumps(VERSIONS, sort_keys=True)),
-                                    encoding='base64').decode()
-        VERSIONS['signature'] = signature
-        keysFilePath = os.path.join(self.fileServerDir, 'keys.gz')
-        with gzip.open(keysFilePath, 'wb') as keysFile:
-            keysFile.write(json.dumps(KEYS, sort_keys=True))
-        versionsFilePath = os.path.join(self.fileServerDir, 'versions.gz')
-        with gzip.open(versionsFilePath, 'wb') as versionsFile:
-            versionsFile.write(json.dumps(VERSIONS, sort_keys=True))
-        with gzip.open(versionsUserDataFilePath, 'wb') as versionsFile:
-            versionsFile.write(json.dumps(VERSIONS, sort_keys=True))
+        # Create user side files (application).
+        user_data_dir = appdirs.user_data_dir(APP_NAME, COMPANY_NAME)
+        if os.path.exists(user_data_dir):
+            shutil.rmtree(user_data_dir)
+        os.makedirs(user_data_dir)
 
-        tempFile = tempfile.NamedTemporaryFile()
-        self.tempDir = tempFile.name
-        tempFile.close()
-        settings.CONFIG_DATA_FOLDER = os.path.join(self.tempDir, '.pyupdater')
-        settings.USER_DATA_FOLDER = os.path.join(self.tempDir, 'pyu-data')
-        os.mkdir(self.tempDir)
+        user_data_update_dir_path = os.path.join(user_data_dir, settings.UPDATE_FOLDER)
+        os.mkdir(user_data_update_dir_path)
+
+        # Create a fake current file
+        user_data_update_current_file_path = os.path.join(
+            user_data_update_dir_path, current_filename
+        )
+        with open(user_data_update_current_file_path, "wb") as current_file:
+            current_file.write(("%s" % CURRENT_VERSION).encode("utf-8"))
+            current_file.seek(FILE_SIZE - 1)
+            current_file.write(b"\0")
+
+        # With a fake current file we can create the file_hash.
+        VERSIONS["updates"][APP_NAME][CURRENT_VERSION_PYU_FORMAT][system][
+            "file_hash"
+        ] = get_package_hashes(user_data_update_current_file_path)
+
+        # Create server side files
+        temp_file = tempfile.NamedTemporaryFile()
+        self.server_dir_path = temp_file.name
+        temp_file.close()
+        os.mkdir(self.server_dir_path)
+
+        server_update_file_path = os.path.join(
+            self.server_dir_path, self.update_filename
+        )
+
+        with open(server_update_file_path, "wb") as update_file:
+            update_file.write(("%s" % UPDATE_VERSION).encode("utf-8"))
+            update_file.seek(FILE_SIZE - 1)
+            update_file.write(b"\0")
+
+        VERSIONS["updates"][APP_NAME][UPDATE_VERSION_PYU_FORMAT][system][
+            "file_hash"
+        ] = get_package_hashes(server_update_file_path)
+
+        server_patch_file_path = os.path.join(self.server_dir_path, patch_filename)
+
+        bsdiff4.file_diff(
+            src_path=user_data_update_current_file_path,
+            dst_path=server_update_file_path,
+            patch_path=server_patch_file_path,
+        )
+        VERSIONS["updates"][APP_NAME][UPDATE_VERSION_PYU_FORMAT][system][
+            "patch_hash"
+        ] = get_package_hashes(server_patch_file_path)
+
+        private_key = ed25519.SigningKey(PRIVATE_KEY.encode("utf-8"), encoding="base64")
+        signature = private_key.sign(
+            json.dumps(VERSIONS, sort_keys=True).encode("utf-8"), encoding="base64"
+        ).decode()
+        VERSIONS["signature"] = signature
+
+        server_keys_file_path = os.path.join(self.server_dir_path, settings.KEY_FILE_FILENAME)
+        with gzip.open(server_keys_file_path, "wb") as keys_file:
+            keys_file.write(json.dumps(KEYS, sort_keys=True).encode("utf-8"))
+
+        server_versions_file_path = os.path.join(
+            self.server_dir_path, settings.VERSION_FILE_FILENAME_COMPAT
+        )
+        with gzip.open(server_versions_file_path, "wb") as versions_file:
+            versions_file.write(json.dumps(VERSIONS, sort_keys=True).encode("utf-8"))
+
+        user_data_versions_file_path = os.path.join(
+            user_data_dir, settings.VERSION_FILE_FILENAME_COMPAT
+        )
+        with gzip.open(user_data_versions_file_path, "wb") as versions_file:
+            versions_file.write(json.dumps(VERSIONS, sort_keys=True).encode("utf-8"))
+
+        temp_file = tempfile.NamedTemporaryFile()
+        self.pyupdater_dir_path = temp_file.name
+        temp_file.close()
+        # Hacking setting with absolute path to have pyBuilder using this folders.
+        settings.CONFIG_DATA_FOLDER = os.path.join(
+            self.pyupdater_dir_path, settings.CONFIG_DATA_FOLDER
+        )
+        settings.USER_DATA_FOLDER = os.path.join(
+            self.pyupdater_dir_path, settings.USER_DATA_FOLDER
+        )
+        os.mkdir(self.pyupdater_dir_path)
         os.mkdir(settings.USER_DATA_FOLDER)
         os.mkdir(settings.CONFIG_DATA_FOLDER)
         # The way we set the App name below avoids having to
         # create .pyupdater/config.pyu:
         settings.GENERIC_APP_NAME = APP_NAME
         settings.GENERIC_COMPANY_NAME = COMPANY_NAME
-        os.environ['PYUPDATER_FILESERVER_DIR'] = self.fileServerDir
-        os.environ['WXUPDATEDEMO_TESTING'] = 'True'
-        os.environ['WXUPDATEDEMO_TESTING_FROZEN'] = 'True'
-        os.environ['WXUPDATEDEMO_TESTING_APP_NAME'] = APP_NAME
-        os.environ['WXUPDATEDEMO_TESTING_COMPANY_NAME'] = COMPANY_NAME
-        os.environ['WXUPDATEDEMO_TESTING_APP_VERSION'] = CURRENT_VERSION
-        os.environ['WXUPDATEDEMO_TESTING_PUBLIC_KEY'] = PUBLIC_KEY
+        os.environ["PYUPDATER_FILESERVER_DIR"] = self.server_dir_path
+        os.environ["WXUPDATEDEMO_TESTING"] = "True"
+        os.environ["WXUPDATEDEMO_TESTING_FROZEN"] = "True"
+        os.environ["WXUPDATEDEMO_TESTING_APP_NAME"] = APP_NAME
+        os.environ["WXUPDATEDEMO_TESTING_COMPANY_NAME"] = COMPANY_NAME
+        os.environ["WXUPDATEDEMO_TESTING_APP_VERSION"] = CURRENT_VERSION
+        os.environ["WXUPDATEDEMO_TESTING_PUBLIC_KEY"] = PUBLIC_KEY
+
+        os.chdir(self.run_py_file_path)
 
     def test_freeze_update_available(self):
         """
@@ -262,9 +297,9 @@ class FreezeUpdateAvailableTester(unittest.TestCase):
         # doesn't seem to get detected automatically by PyInstaller (observed
         # on Windows), so we add this as a hidden import.
 
-        pyiArgs = ['--hidden-import=SocketServer', 'run.py']
+        pyi_args = []
 
-        if get_system() == 'mac':
+        if get_system() == "mac":
             # On Mac, we need to use PyInstaller's --windowed option to create
             # an app bundle, otherwise attempting to run the frozen application
             # gives this error:
@@ -276,145 +311,175 @@ class FreezeUpdateAvailableTester(unittest.TestCase):
             # On other platforms, we will build a console application for the
             # purposes of testing, so that we can easily interact with its
             # STDOUT and STDERR:
-            pyiArgs = ['--windowed'] + pyiArgs
+            pyi_args += ["--windowed"]
         else:
-            pyiArgs = ['--console'] + pyiArgs
+            pyi_args += ["--console"]
+
+        # pyi_args += ["--hidden-import=SocketServer"]
+
+        pyi_args += ["run.py"]
+
         wxupdatedemo.__version__ = CURRENT_VERSION
-        args = Namespace(app_version=CURRENT_VERSION, clean=False,
-                         command='build', distpath=None, keep=False,
-                         name=None, onedir=False, onefile=False,
-                         specpath=None, workpath=None)
-        builder = Builder(args, pyiArgs)
+
+        # parser = get_parser()
+        # result = parser.parse_known_args(
+        #     ["build", "--app-version", CURRENT_VERSION] + pyi_args
+        # )
+        # assert False, result
+
+        args = Namespace(
+            app_version=CURRENT_VERSION,
+            archive_format="default",
+            clean=False,
+            command="build",
+            distpath=None,
+            keep=False,
+            name=None,
+            pyi_log_info=False,
+            specpath=None,
+            workpath=None,
+        )
+        # Running pyUpdater build
+        builder = Builder(args, pyi_args)
         builder.build()
-        if get_system() == 'win':
-            ext = '.zip'
+
+        if get_system() == "win":
+            ext = ".zip"
         else:
-            ext = '.tar.gz'
-        buildFilename = \
-            '%s-%s-%s%s' % (APP_NAME, get_system(), CURRENT_VERSION, ext)
-        newDir = os.path.join(settings.USER_DATA_FOLDER, 'new')
-        self.assertEqual(os.listdir(newDir), [buildFilename])
-        os.chdir(newDir)
-        if get_system() == 'win':
-            with zipfile.ZipFile(buildFilename, 'r') as zipFile:
-                zipFile.extractall()
-            pathToExe = '%s.exe' % APP_NAME
-            self.assertEqual(sorted(os.listdir('.')),
-                             [buildFilename, pathToExe])
-        elif get_system() == 'mac':
-            tar = tarfile.open(buildFilename, "r:gz")
+            ext = ".tar.gz"
+
+        build_filename = "%s-%s-%s%s" % (APP_NAME, get_system(), CURRENT_VERSION, ext)
+
+        new_dir = os.path.join(settings.USER_DATA_FOLDER, "new")
+        self.assertEqual(os.listdir(new_dir), [build_filename])
+
+        os.chdir(new_dir)
+        if get_system() == "win":
+            with zipfile.ZipFile(build_filename, "r") as zip_file:
+                zip_file.extractall()
+            self.assertEqual(sorted(os.listdir(".")), [APP_NAME, build_filename])
+            path_to_exe = os.path.join(APP_NAME, f"{APP_NAME}.exe")
+        elif get_system() == "mac":
+            tar = tarfile.open(build_filename, "r:gz")
             tar.extractall()
             tar.close()
-            appBundleName = '%s.app' % APP_NAME
-            self.assertEqual(sorted(os.listdir('.')),
-                             [buildFilename, appBundleName])
-            pathToExe = os.path.join(newDir, '%s.app' % APP_NAME,
-                                     'Contents', 'MacOS', APP_NAME)
+            app_bundle_name = "%s.app" % APP_NAME
+            self.assertEqual(sorted(os.listdir(".")), [build_filename, app_bundle_name])
+            path_to_exe = os.path.join(
+                new_dir, "%s.app" % APP_NAME, "Contents", "MacOS", APP_NAME
+            )
         else:  # Linux / Unix
-            tar = tarfile.open(buildFilename, "r:gz")
+            tar = tarfile.open(build_filename, "r:gz")
             tar.extractall()
             tar.close()
-            pathToExe = os.path.join(newDir, APP_NAME)
+            path_to_exe = os.path.join(new_dir, APP_NAME)
 
         sys.stderr.write("\n\nTesting ability to apply patch update...\n")
 
-        cmdList = [pathToExe, '--debug']
-        runExeProc = subprocess.Popen(cmdList,
-                                      stdout=subprocess.PIPE,
-                                      stderr=subprocess.STDOUT,
-                                      env=os.environ.copy())
-        runExeStdout, _ = runExeProc.communicate()
-        logger.debug(runExeStdout)
-        self.assertEqual(runExeProc.returncode, 0)
-        appliedPatchSuccessfully = False
-        statusPrefix = "Exiting with status: "
-        for line in runExeStdout.splitlines():
+        cmd_list = [path_to_exe, "--debug"]
+        run_exe_proc = subprocess.Popen(
+            cmd_list,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            env=os.environ.copy(),
+            text=True,
+        )
+        run_exe_stdout, _ = run_exe_proc.communicate()
+        logger.debug(run_exe_stdout)
+        self.assertEqual(run_exe_proc.returncode, 0)
+        applied_patch_successfully = False
+        status_prefix = "Exiting with status: "
+        for line in run_exe_stdout.splitlines():
             if "Applied patch successfully" in line:
                 sys.stderr.write("\t%s\n" % line)
-                appliedPatchSuccessfully = True
+                applied_patch_successfully = True
             if line.startswith("Exiting with status: "):
                 sys.stderr.write("\t%s\n" % line)
-                status = line.split(statusPrefix)[1]
+                status = line.split(status_prefix)[1]
                 self.assertEqual(status, "Extracting update and restarting.")
-        self.assertTrue(appliedPatchSuccessfully)
+        self.assertTrue(applied_patch_successfully)
 
         # Remove all local data from previous PyUpdater downloads:
         if os.path.exists(appdirs.user_data_dir(APP_NAME, COMPANY_NAME)):
             shutil.rmtree(appdirs.user_data_dir(APP_NAME, COMPANY_NAME))
         # Now we can't patch because there's no base binary to patch from:
         sys.stderr.write("\nTesting ability to download full update...\n")
-        runExeProc = subprocess.Popen(cmdList,
-                                      stdout=subprocess.PIPE,
-                                      stderr=subprocess.STDOUT,
-                                      env=os.environ.copy())
-        runExeStdout, _ = runExeProc.communicate()
-        logger.debug(runExeStdout)
-        self.assertEqual(runExeProc.returncode, 0)
-        fullDownloadSuccessful = False
-        statusPrefix = "Exiting with status: "
-        for line in runExeStdout.splitlines():
+        run_exe_proc = subprocess.Popen(
+            cmd_list,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            env=os.environ.copy(),
+            text=True,
+        )
+        run_exe_stdout, _ = run_exe_proc.communicate()
+        logger.debug(run_exe_stdout)
+        self.assertEqual(run_exe_proc.returncode, 0)
+        full_download_successful = False
+        status_prefix = "Exiting with status: "
+        for line in run_exe_stdout.splitlines():
             if "Full download successful" in line:
                 sys.stderr.write("\t%s\n" % line)
-                fullDownloadSuccessful = True
+                full_download_successful = True
             if line.startswith("Exiting with status: "):
                 sys.stderr.write("\t%s\n" % line)
-                status = line.split(statusPrefix)[1]
+                status = line.split(status_prefix)[1]
                 self.assertEqual(status, "Extracting update and restarting.")
-        self.assertTrue(fullDownloadSuccessful)
+        self.assertTrue(full_download_successful)
 
         # Remove all local data from previous PyUpdater downloads:
         if os.path.exists(appdirs.user_data_dir(APP_NAME, COMPANY_NAME)):
             shutil.rmtree(appdirs.user_data_dir(APP_NAME, COMPANY_NAME))
         # Remove update archive from file server:
-        os.remove(os.path.join(self.fileServerDir,
-                               self.updateFilename))
+        os.remove(os.path.join(self.server_dir_path, self.update_filename))
         # Now attempting to update should fail - can't download update.
-        sys.stderr.write(
-            "\nTesting ability to report failed download of update...\n")
-        runExeProc = subprocess.Popen(cmdList,
-                                      stdout=subprocess.PIPE,
-                                      stderr=subprocess.STDOUT,
-                                      env=os.environ.copy())
-        runExeStdout, _ = runExeProc.communicate()
-        logger.debug(runExeStdout)
-        self.assertEqual(runExeProc.returncode, 0)
-        statusPrefix = "Exiting with status: "
-        fullDownloadFailed = False
-        for line in runExeStdout.splitlines():
+        sys.stderr.write("\nTesting ability to report failed download of update...\n")
+        run_exe_proc = subprocess.Popen(
+            cmd_list,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            env=os.environ.copy(),
+            text=True,
+        )
+        run_exe_stdout, _ = run_exe_proc.communicate()
+        logger.info(run_exe_stdout)
+        self.assertEqual(run_exe_proc.returncode, 0)
+        status_prefix = "Exiting with status: "
+        full_download_failed = False
+        for line in run_exe_stdout.splitlines():
             if "Full download failed" in line:
                 sys.stderr.write("\t%s\n" % line)
-                fullDownloadFailed = True
+                full_download_failed = True
             if line.startswith("Exiting with status: "):
                 sys.stderr.write("\t%s\n" % line)
-                status = line.split(statusPrefix)[1]
+                status = line.split(status_prefix)[1]
                 self.assertEqual(status, "Update download failed.")
-        self.assertTrue(fullDownloadFailed)
-
+        self.assertTrue(full_download_failed)
 
     def tearDown(self):
         """
         Clean up.
         """
-        wxupdatedemo.__version__ = self.originalVersion
+        wxupdatedemo.__version__ = self.original_version
         try:
-            shutil.rmtree(self.tempDir)
+            shutil.rmtree(self.pyupdater_dir_path)
         except OSError:
-            logger.warning("Couldn't remove %s", self.tempDir)
-        os.chdir(self.initialWorkingDir)
+            logger.warning("Couldn't remove %s", self.pyupdater_dir_path)
+        os.chdir(self.run_py_file_path)
         try:
-            shutil.rmtree(self.fileServerDir)
+            shutil.rmtree(self.server_dir_path)
         except OSError:
-            logger.warning("Couldn't remove %s", self.fileServerDir)
-        del os.environ['PYUPDATER_FILESERVER_DIR']
-        del os.environ['WXUPDATEDEMO_TESTING']
-        del os.environ['WXUPDATEDEMO_TESTING_FROZEN']
-        del os.environ['WXUPDATEDEMO_TESTING_APP_NAME']
-        del os.environ['WXUPDATEDEMO_TESTING_COMPANY_NAME']
-        del os.environ['WXUPDATEDEMO_TESTING_APP_VERSION']
-        del os.environ['WXUPDATEDEMO_TESTING_PUBLIC_KEY']
+            logger.warning("Couldn't remove %s", self.server_dir_path)
+        del os.environ["PYUPDATER_FILESERVER_DIR"]
+        del os.environ["WXUPDATEDEMO_TESTING"]
+        del os.environ["WXUPDATEDEMO_TESTING_FROZEN"]
+        del os.environ["WXUPDATEDEMO_TESTING_APP_NAME"]
+        del os.environ["WXUPDATEDEMO_TESTING_COMPANY_NAME"]
+        del os.environ["WXUPDATEDEMO_TESTING_APP_VERSION"]
+        del os.environ["WXUPDATEDEMO_TESTING_PUBLIC_KEY"]
         if os.path.exists(appdirs.user_data_dir(APP_NAME, COMPANY_NAME)):
             try:
                 shutil.rmtree(appdirs.user_data_dir(APP_NAME, COMPANY_NAME))
             except OSError:
-                logger.warning("Couldn't remove %s",
-                               appdirs.user_data_dir(APP_NAME, COMPANY_NAME))
+                logger.warning(
+                    "Couldn't remove %s", appdirs.user_data_dir(APP_NAME, COMPANY_NAME)
+                )

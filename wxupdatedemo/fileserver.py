@@ -12,30 +12,30 @@ LOCALHOST = '127.0.0.1'
 logger = logging.getLogger(__name__)
 
 
-def RunFileServer(fileServerDir, fileServerPort):
+def run_file_server(file_server_dir, file_server_port):
     """
     Run a Flask file server on the given port.
 
     Explicitly specify instance_path, because Flask's
     auto_find_instance_path can fail when run in a frozen app.
     """
-    app = Flask(__name__, instance_path=fileServerDir)
+    app = Flask(__name__, instance_path=file_server_dir)
 
     @app.route('/fileserver-is-ready', methods=['GET'])
-    def FileserverIsReady():  # pylint: disable=unused-variable
+    def file_server_is_ready():  # pylint: disable=unused-variable
         """
         Used to test if file server has started.
         """
         return 'Fileserver is ready!'
 
     @app.route('/<path:filename>', methods=['GET'])
-    def ServeFile(filename):  # pylint: disable=unused-variable
+    def serve_file(filename):  # pylint: disable=unused-variable
         """
         Serves up a file from PYUPDATER_FILESERVER_DIR.
         """
-        return send_from_directory(fileServerDir, filename.strip('/'))
+        return send_from_directory(file_server_dir, filename.strip('/'))
 
-    def ShutDownServer():
+    def shut_down_server():
         """
         Shut down the file server.
         """
@@ -45,17 +45,17 @@ def RunFileServer(fileServerDir, fileServerPort):
         func()
 
     @app.route('/shutdown', methods=['POST'])
-    def ShutDown():  # pylint: disable=unused-variable
+    def shut_down():  # pylint: disable=unused-variable
         """
         Respond to a POSTed request to shut down the file server.
         """
-        ShutDownServer()
+        shut_down_server()
         return 'Server shutting down...'
 
-    app.run(host=LOCALHOST, port=fileServerPort)
+    app.run(host=LOCALHOST, port=file_server_port)
 
 
-def WaitForFileServerToStart(port):
+def wait_for_file_server_to_start(port):
     """
     Wait for the Flask file server to start up.  Test it by trying the
     PyUpdater update URL, e.g. http://127.0.0.1:12345.  If we receive
@@ -79,7 +79,7 @@ def WaitForFileServerToStart(port):
                 return
 
 
-def ShutDownFileServer(port):
+def shut_down_file_server(port):
     """
     Shut down the file server.
     """

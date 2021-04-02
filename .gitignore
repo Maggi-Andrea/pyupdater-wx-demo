@@ -89,6 +89,10 @@ ENV/
 .ropeproject
 
 # PyUpdater
-.pyupdater/
+.pyupdater
 pyu-data
 keypack.pyu
+client_config.py
+
+# Pychar,
+/.idea

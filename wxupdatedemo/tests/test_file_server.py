@@ -8,11 +8,11 @@ import os
 
 import requests
 
-from wxupdatedemo.fileserver import RunFileServer
-from wxupdatedemo.fileserver import WaitForFileServerToStart
-from wxupdatedemo.fileserver import ShutDownFileServer
+from wxupdatedemo.fileserver import run_file_server
+from wxupdatedemo.fileserver import wait_for_file_server_to_start
+from wxupdatedemo.fileserver import shut_down_file_server
 from wxupdatedemo.fileserver import LOCALHOST
-from wxupdatedemo.utils import GetEphemeralPort
+from wxupdatedemo.utils import get_ephemeral_port
 
 
 class FileServerTester(unittest.TestCase):
@@ -21,42 +21,42 @@ class FileServerTester(unittest.TestCase):
     """
     def __init__(self, *args, **kwargs):
         super(FileServerTester, self).__init__(*args, **kwargs)
-        self.fileServerThread = None
-        self.fileServerPort = None
-        self.testFileName = "testfile.txt"
-        self.testFileContent = "Hello, world!"
+        self.file_server_thread = None
+        self.file_server_port = None
+        self.test_file_name = "testfile.txt"
+        self.test_file_content = "Hello, world!"
 
     def setUp(self):
-        tempFile = tempfile.NamedTemporaryFile()
-        self.fileServerDir = tempFile.name
-        tempFile.close()
-        os.mkdir(self.fileServerDir)
-        testFilePath = os.path.join(self.fileServerDir, self.testFileName)
-        with open(testFilePath, 'w') as testFile:
-            testFile.write(self.testFileContent)
-        os.environ['PYUPDATER_FILESERVER_DIR'] = self.fileServerDir
+        temp_file = tempfile.NamedTemporaryFile()
+        self.file_server_dir = temp_file.name
+        temp_file.close()
+        os.mkdir(self.file_server_dir)
+        test_file_path = os.path.join(self.file_server_dir, self.test_file_name)
+        with open(test_file_path, 'w') as testFile:
+            testFile.write(self.test_file_content)
+        os.environ['PYUPDATER_FILESERVER_DIR'] = self.file_server_dir
         os.environ['WXUPDATEDEMO_TESTING'] = 'True'
 
     def test_file_server(self):
         """
         Test ability to run file server
         """
-        self.fileServerPort = GetEphemeralPort()
-        self.fileServerThread = \
-            threading.Thread(target=RunFileServer,
-                             args=(self.fileServerDir, self.fileServerPort))
-        self.fileServerThread.start()
-        WaitForFileServerToStart(self.fileServerPort)
-        url = "http://%s:%s" % (LOCALHOST, self.fileServerPort)
-        url = "%s/%s" % (url, self.testFileName)
+        self.file_server_port = get_ephemeral_port()
+        self.file_server_thread = \
+            threading.Thread(target=run_file_server,
+                             args=(self.file_server_dir, self.file_server_port))
+        self.file_server_thread.start()
+        wait_for_file_server_to_start(self.file_server_port)
+        url = "http://%s:%s" % (LOCALHOST, self.file_server_port)
+        url = "%s/%s" % (url, self.test_file_name)
         response = requests.get(url, timeout=1)
-        self.assertEqual(response.text, self.testFileContent)
+        self.assertEqual(response.text, self.test_file_content)
 
     def tearDown(self):
         """
         Shut down file server
         """
-        ShutDownFileServer(self.fileServerPort)
-        self.fileServerThread.join()
+        shut_down_file_server(self.file_server_port)
+        self.file_server_thread.join()
         del os.environ['PYUPDATER_FILESERVER_DIR']
         del os.environ['WXUPDATEDEMO_TESTING']

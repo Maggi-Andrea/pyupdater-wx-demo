@@ -3,7 +3,8 @@ Utility methods for PyUpdaterWxDemo.
 """
 import socket
 
-def GetEphemeralPort():
+
+def get_ephemeral_port():
     """
     Return an unused ephemeral port.
     """
